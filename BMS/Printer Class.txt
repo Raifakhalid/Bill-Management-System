@@ -1,0 +1,12 @@
+package billing;
+
+public class PrinterClass {
+	    public static final String TAB = "\t\t\t\t";
+
+	    public static void print(String data) {
+	        System.out.print(TAB+data);
+	    }
+	    public static void println(String data) {
+	        System.out.println(TAB+data);
+	    }
+}

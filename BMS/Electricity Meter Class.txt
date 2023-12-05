@@ -1,0 +1,47 @@
+package billing;
+import java.io.Serializable;
+import java.util.ArrayList;
+public class ElectricityMeter implements Serializable {
+    private int MeterId;
+    private String Address;
+    private ArrayList<Integer> UnitsPerMonth;
+    private double AmountRemaining;
+    public ElectricityMeter() {
+        UnitsPerMonth = new ArrayList<>();
+    }
+    public ElectricityMeter(int meterId, String address, double amountRemaining) {
+        MeterId = meterId;
+        Address = address;
+        AmountRemaining = amountRemaining;
+        UnitsPerMonth = new ArrayList<>();
+    }
+    void InsertUnit(int Unit) {
+        UnitsPerMonth.add(Unit);
+    }
+    public ArrayList<Integer> getUnitsPerMonth() {
+        return UnitsPerMonth;
+    }
+    public int getMeterId() {
+        return MeterId;
+    }
+    public void setMeterId(int meterId) {
+        MeterId = meterId;
+    }
+    public String getAddress() {
+        return Address;
+    }
+    public void setAddress(String address) {
+        Address = address;
+    }
+    public double getAmountRemaining() {
+        return AmountRemaining;
+    }
+    public void setAmountRemaining(double amountRemaining) {
+        AmountRemaining = amountRemaining;
+    }
+    public void Display() {
+        PrinterClass.println("Meter id :: " + MeterId);
+        PrinterClass.println("Address :: " + Address);
+        PrinterClass.println("Amount Remaining :: " + AmountRemaining);
+}
+}

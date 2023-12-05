@@ -1,0 +1,45 @@
+package billing;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+public class DataManagement 
+{
+	  public boolean FindCNIC(ArrayList<Client> arrayList, String CNIC) {
+	        for (Client client : arrayList) {
+	            if (client.getCNIC().equals(CNIC))
+	                return true;
+	        }
+	        return false;
+	    }
+	    public boolean FindMeterId(ArrayList<Client> arrayList, int MeterId) {
+	        for (Client client : arrayList) {
+	            for (int i = 0; i < client.getTotalMeters(); i++) {
+	                if (client.getElectricityMeters()[i].getMeterId() == MeterId)
+	                    return true;
+	            }
+	        }
+	        return false;
+	    }
+	    void Update(ArrayList<Client> clients) {
+	        try {
+	            FileOutputStream fileInputStream = new FileOutputStream("USER_DATA.txt");
+	            ObjectOutputStream Output_data = new ObjectOutputStream(fileInputStream);
+	            Output_data.writeObject(clients);
+	            Output_data.flush();
+	            Output_data.close();
+	        } catch (Exception e) {
+	        }
+	    }
+	    ArrayList<Client> ReadData() {
+	        ArrayList<Client> data = new ArrayList<Client>();
+	        try {
+	            FileInputStream fileInputStream = new FileInputStream("USER_DATA.txt");
+	            ObjectInputStream Inputdata = new ObjectInputStream(fileInputStream);
+	            data = (ArrayList<Client>) Inputdata.readObject();
+	        } catch (Exception e) {
+	        }
+	        return data;
+	    }
+	}

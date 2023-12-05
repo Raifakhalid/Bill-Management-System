@@ -1,0 +1,63 @@
+package billing;
+
+public class BillScheme
+{
+	    public static final double FOR_FIRST_300_UNITS = 10.0;
+	    public static final double FOR_301_UNITS_TO_500 = 12;
+	    public static final double FOR_501_UNITS_TO_600 = 14;
+	    public static final double FOR_601_OR_GRATER = 15;
+	    public static final double TV_FEE = 35;
+	    public static final double TAX_PERCENTAGE = 5;
+
+	    private final int Units;
+
+	    public BillScheme(int units) {
+	        Units = units;
+	    }
+
+	    public double CalculateBill() {
+	        double Amount = 0.0;
+	        if (Units <= 300) {
+	            Amount = Units * FOR_FIRST_300_UNITS;
+	        } else if (Units <= 500) {
+	            int subUni = Units - 300;
+	            Amount = Units * FOR_FIRST_300_UNITS;
+	            Amount += subUni * FOR_301_UNITS_TO_500;
+	        } else if (Units <= 600) {
+	            int subUni = Units - 300;
+	            int subUni2 = subUni - 200;
+	            Amount = Units * FOR_FIRST_300_UNITS;
+	            Amount += subUni * FOR_301_UNITS_TO_500;
+	            Amount += subUni2 * FOR_501_UNITS_TO_600;
+	        } else {
+	            int subUni = Units - 300;
+	            int subUni2 = subUni - 200;
+	            int subUni3 = subUni2 - 100;
+	            Amount = Units * FOR_FIRST_300_UNITS;
+	            Amount += subUni * FOR_301_UNITS_TO_500;
+	            Amount += subUni2 * FOR_501_UNITS_TO_600;
+	            Amount += subUni3 * FOR_601_OR_GRATER;
+	        }
+	        return Amount;
+	    }
+
+	    public double CalculateTAX() {
+	        return CalculateBill() * (TAX_PERCENTAGE / 100.0);
+
+	    }
+
+	    public double CalculateTotalBill() {
+	        return CalculateBill() + CalculateTAX() + TV_FEE;
+	    }
+
+	    void Display() {
+	        System.out.println("");
+	        PrinterClass.println("No Of Units       :: " + Units);
+	        PrinterClass.println("Unit Price        :: " + CalculateBill());
+	        PrinterClass.println("TAX               :: " + CalculateTAX());
+	        PrinterClass.println("TV FE             :: " + TV_FEE);
+	        PrinterClass.println("Total             :: " + CalculateTotalBill());
+	    }
+
+
+	}

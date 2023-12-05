@@ -1,0 +1,371 @@
+package billing;
+import java.util.ArrayList;
+import java.util.Scanner;
+public class Main {
+
+	 private final String Username = "admin";
+	    private final String Password = "admin";
+	    private ArrayList<Client> ClientData;
+	    private DataManagement dataManagement;
+
+	    Main() {
+	        dataManagement = new DataManagement();
+	        ClientData = dataManagement.ReadData();
+	    }
+
+	    void MainMenu() {
+	        PrinterClass.println("============================================");
+	        PrinterClass.println("|| Press 1 for Add new Client             ||");
+	        PrinterClass.println("|| Press 2 for Add new Meter for client   ||");
+	        PrinterClass.println("|| Press 3 Calculate Bill/generate        ||");
+	        PrinterClass.println("|| Press 4 Old Bill Records               ||");
+	        PrinterClass.println("|| Press 5 Change Client Info             ||");
+	        PrinterClass.println("|| Press 6 Pay Bill                      ||");
+	        PrinterClass.println("|| Press 7 Exit                           ||");
+	        PrinterClass.println("============================================");
+	        PrinterClass.print("|| Enter Your Choice :: ");
+	    }
+
+	    void AddNewClient() {
+	        System.out.println("");
+	        PrinterClass.println("=============== Enter Client Data================");
+	        Scanner Input = new Scanner(System.in);
+	        String FullName;
+	        String Email;
+	        String CNIC;
+	        String PhoneNumber;
+	        PrinterClass.print("Enter full name :: ");
+	        FullName = Input.nextLine();
+	        PrinterClass.print("Enter Email :: ");
+	        Email = Input.next();
+	        PrinterClass.print("Enter CNIC :: ");
+	        CNIC = Input.next();
+	        while (dataManagement.FindCNIC(ClientData, CNIC)) {
+	            PrinterClass.println("CNIC Already Exist");
+	            PrinterClass.print("Enter CNIC :: ");
+	            CNIC = Input.next();
+	        }
+	        PrinterClass.print("Enter Phone number :: ");
+	        PhoneNumber = Input.next();
+	        ClientData.add(new Client(FullName, Email, CNIC, PhoneNumber, 0));
+	        dataManagement.Update(ClientData);
+	        System.out.println("");
+	        PrinterClass.println("=============== Client Added   ================");
+	    }
+
+	    void AddNewMeter() {
+	        System.out.println("");
+	        PrinterClass.println("=============== Enter Meter Data================");
+	        Scanner Input = new Scanner(System.in);
+	        String CNIC;
+	        PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	        CNIC = Input.next();
+	        if (CNIC.equals("0"))
+	            return;
+	        while (!dataManagement.FindCNIC(ClientData, CNIC)) {
+	            PrinterClass.println("CNIC Not present ");
+	            PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	            CNIC = Input.next();
+	            if (CNIC.equals("0"))
+	                return;
+	        }
+	        int MeterId;
+	        String Address;
+	        PrinterClass.print("Enter id for meter :: ");
+	        MeterId = Input.nextInt();
+	        while (dataManagement.FindMeterId(ClientData, MeterId)) {
+	            PrinterClass.println("Meter id already taken :: ");
+	            PrinterClass.print("Enter id for meter :: ");
+	            MeterId = Input.nextInt();
+	        }
+	        Input.nextLine();
+	        PrinterClass.print("Enter Address :: ");
+	        Address = Input.nextLine();
+	        for (int i = 0; i < ClientData.size(); i++) {
+	            if (ClientData.get(i).getCNIC().equals(CNIC)) {
+	                ClientData.get(i).InsertMeter(new ElectricityMeter(MeterId, Address, 0));
+
+	            }
+	        }
+	        dataManagement.Update(ClientData);
+	        PrinterClass.println("=============== Meter Added   ================");
+	    }
+
+	    void CalculateBill() {
+	        System.out.println("");
+	        PrinterClass.println("===============Calculate Bill================");
+	        Scanner Input = new Scanner(System.in);
+	        String CNIC;
+	        PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	        CNIC = Input.next();
+	        if (CNIC.equals("0"))
+	            return;
+	        while (!dataManagement.FindCNIC(ClientData, CNIC)) {
+	            PrinterClass.println("CNIC Not present ");
+	            PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	            CNIC = Input.next();
+	            if (CNIC.equals("0"))
+	                return;
+	        }
+	        int index = -1;
+	        int ch = -1;
+	        for (int i = 0; i < ClientData.size(); i++) {
+	            if (ClientData.get(i).getCNIC().equals(CNIC) && ClientData.get(i).getTotalMeters() > 0) {
+	                index = i;
+	                for (int j = 0; j < ClientData.get(i).getTotalMeters(); j++) {
+	                    PrinterClass.println("Press " + (j + 1) + " for meter " + (j + 1));
+	                }
+	                PrinterClass.print("Enter Your Choice :: ");
+	                ch = Input.nextInt();
+	                while (ch <= 0 || ch > ClientData.get(i).getTotalMeters()) {
+	                    PrinterClass.print("Please enter a valid Choice :: ");
+	                    ch = Input.nextInt();
+	                }
+
+	            }
+	        }
+	        if (index == -1) {
+	            PrinterClass.println("No Registered Meter ");
+	            return;
+	        }
+	        int Unit = 0;
+	        PrinterClass.print("Enter the number of units :: ");
+	        Unit = Input.nextInt();
+	        while (Unit < 0) {
+	            PrinterClass.println("please enter a valid unit >0 ");
+	            PrinterClass.print("Enter the number of units :: ");
+	            Unit = Input.nextInt();
+	        }
+	        ch--;
+	        ClientData.get(index).getElectricityMeters()[ch].InsertUnit(Unit);
+	        BillScheme billSchema = new BillScheme(Unit);
+	        ClientData.get(index).getElectricityMeters()[ch].setAmountRemaining(
+	                ClientData.get(index).getElectricityMeters()[ch].getAmountRemaining() + billSchema.CalculateTotalBill()
+	        );
+	        System.out.println("");
+	        PrinterClass.println("================ Printing Bill ==================");
+	        System.out.println("");
+	        ClientData.get(index).Display();
+	        System.out.println("");
+	        PrinterClass.println("===============================================");
+	        System.out.println("");
+	        billSchema.Display();
+	        dataManagement.Update(ClientData);
+	        PrinterClass.println("=============== Bill Calculated   ================");
+	    }
+
+	    void OldRecord() {
+	        System.out.println("");
+	        PrinterClass.println("=============== Old Bill Record ================");
+	        Scanner Input = new Scanner(System.in);
+	        String CNIC;
+	        PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	        CNIC = Input.next();
+	        if (CNIC.equals("0"))
+	            return;
+	        while (!dataManagement.FindCNIC(ClientData, CNIC)) {
+	            PrinterClass.println("CNIC Not present ");
+	            PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	            CNIC = Input.next();
+	            if (CNIC.equals("0"))
+	                return;
+	        }
+	        int index = -1;
+	        int ch = -1;
+	        for (int i = 0; i < ClientData.size(); i++) {
+	            if (ClientData.get(i).getCNIC().equals(CNIC) && ClientData.get(i).getTotalMeters() > 0) {
+	                index = i;
+	                for (int j = 0; j < ClientData.get(i).getTotalMeters(); j++) {
+	                    PrinterClass.println("Press " + (j + 1) + " for meter " + (j + 1));
+	                }
+	                PrinterClass.print("Enter Your Choice :: ");
+	                ch = Input.nextInt();
+	                while (ch <= 0 || ch > ClientData.get(i).getTotalMeters()) {
+	                    PrinterClass.print("Please enter a valid Choice :: ");
+	                    ch = Input.nextInt();
+	                }
+
+	            }
+	        }
+	        if (index == -1) {
+	            PrinterClass.println("No Registered Meter ");
+	            return;
+	        }
+	        ch--;
+	        int TotalMonth = ClientData.get(index).getElectricityMeters()[ch].getUnitsPerMonth().size();
+	        if (TotalMonth == 0) {
+	            PrinterClass.println("No Old Record For  Meter ");
+	            PrinterClass.println("=================================================");
+	            return;
+	        }
+	        int sel;
+	        PrinterClass.print("Select month from 1 - " + TotalMonth + " :: ");
+	        sel = Input.nextInt();
+	        while (sel < 1 || sel > TotalMonth) {
+	            PrinterClass.println("Select  a valid option");
+	            PrinterClass.print("Select month from 1 - " + TotalMonth + " :: ");
+	            sel = Input.nextInt();
+	        }
+	        sel--;
+	        PrinterClass.println("                   ||| Generating Old Bill |||              ");
+	        PrinterClass.println("====================== Owner Information   =================");
+	        ClientData.get(index).Display();
+	        PrinterClass.println("======================      Old Bill       =================");
+	        BillScheme billSchema = new BillScheme(
+	                ClientData.get(index).getElectricityMeters()[ch].getUnitsPerMonth().get(sel)
+	        );
+	        billSchema.Display();
+	        PrinterClass.println("=================================================");
+
+	    }
+
+	    void ChangeClientInfo() {
+	        System.out.println("");
+	        PrinterClass.println("=============== Change Client Info ================");
+	        Scanner Input = new Scanner(System.in);
+	        String CNIC;
+	        PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	        CNIC = Input.next();
+	        if (CNIC.equals("0"))
+	            return;
+	        while (!dataManagement.FindCNIC(ClientData, CNIC)) {
+	            PrinterClass.println("CNIC Not present ");
+	            PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	            CNIC = Input.next();
+	            if (CNIC.equals("0"))
+	                return;
+	        }
+	        int index = -1;
+	        for (int i = 0; i < ClientData.size(); i++) {
+	            if (ClientData.get(i).getCNIC().equals(CNIC) && ClientData.get(i).getTotalMeters() > 0) {
+	                index = i;
+
+	            }
+
+	        }
+
+	        PrinterClass.println("=============================================");
+	        PrinterClass.println("|| Press 1 for changing Email              ||");
+	        PrinterClass.println("|| Press 2 for changing number             ||");
+	        PrinterClass.println("|| Press 3 Cancel                          ||");
+	        PrinterClass.println("=============================================");
+	        PrinterClass.print("|| Enter Your choice :: ");
+	        int c;
+	        c = Input.nextInt();
+	        String email = null, number = null;
+	        switch (c) {
+	            case 1 -> {
+	                PrinterClass.print("|| Enter New Email :: ");
+	                email = Input.next();
+	            }
+	            case 2 -> {
+	                PrinterClass.print("|| Enter New Phone Number :: ");
+	                number = Input.next();
+	            }
+	        }
+	        if (email != null) {
+	            ClientData.get(index).setEmail(email);
+	        } else if (number != null) {
+	            ClientData.get(index).setPhoneNumber(number);
+	        }
+	        dataManagement.Update(ClientData);
+	        PrinterClass.println("=============================================");
+	    }
+
+	    void PayBill() {
+	        System.out.println("");
+	        PrinterClass.println("=============== Pay Bill================");
+	        Scanner Input = new Scanner(System.in);
+	        String CNIC;
+	        PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	        CNIC = Input.next();
+	        if (CNIC.equals("0"))
+	            return;
+	        while (!dataManagement.FindCNIC(ClientData, CNIC)) {
+	            PrinterClass.println("CNIC Not present ");
+	            PrinterClass.print("Enter CNIC OF client OR Enter 0 for main menu :: ");
+	            CNIC = Input.next();
+	            if (CNIC.equals("0"))
+	                return;
+	        }
+	        int index = -1;
+	        int ch = -1;
+	        for (int i = 0; i < ClientData.size(); i++) {
+	            if (ClientData.get(i).getCNIC().equals(CNIC) && ClientData.get(i).getTotalMeters() > 0) {
+	                index = i;
+	                for (int j = 0; j < ClientData.get(i).getTotalMeters(); j++) {
+	                    PrinterClass.println("Press " + (j + 1) + " for meter " + (j + 1));
+	                }
+	                PrinterClass.print("Enter Your Choice :: ");
+	                ch = Input.nextInt();
+	                while (ch <= 0 || ch > ClientData.get(i).getTotalMeters()) {
+	                    PrinterClass.print("Please enter a valid Choice :: ");
+	                    ch = Input.nextInt();
+	                }
+
+	            }
+	        }
+	        if (index == -1) {
+	            PrinterClass.println("No Registered Meter ");
+	            return;
+	        }
+	        ch--;
+	        PrinterClass.println(" Amount Remaining :: " + ClientData.get(index).getElectricityMeters()[ch].getAmountRemaining());
+	        double am = 0.0;
+	        PrinterClass.print("Enter the Amount to pay >=0 :: ");
+	        am = Input.nextInt();
+	        while (am < 0) {
+	            PrinterClass.println("Enter a valid amount ");
+	            PrinterClass.print("Enter the Amount to pay >=0 :: ");
+	            am = Input.nextInt();
+	        }
+	        ClientData.get(index).getElectricityMeters()[ch].setAmountRemaining(
+	                ClientData.get(index).getElectricityMeters()[ch].getAmountRemaining() - am
+	        );
+	        PrinterClass.println(" Amount Remaining :: " + ClientData.get(index).getElectricityMeters()[ch].getAmountRemaining());
+	        dataManagement.Update(ClientData);
+	        PrinterClass.println("=================  Amount Paid  =====================");
+	    }
+
+	    boolean login() {
+	        String user, pass;
+	        Scanner Input = new Scanner(System.in);
+	        PrinterClass.println("==================== Sign in ===============");
+	        PrinterClass.print("|| Enter Username :: ");
+	        user = Input.next();
+	        PrinterClass.print("|| Enter Password :: ");
+	        pass = Input.next();
+	        return (Username.equals(user) && Password.equals(pass));
+	    }
+
+	    void Start() {
+	        Scanner scanner = new Scanner(System.in);
+	        boolean flag = login();
+	        while (!flag) {
+	            PrinterClass.println("Invalid credentials try again ");
+	            flag = login();
+	        }
+	        int ch;
+	        while (flag) {
+	            MainMenu();
+	            ch = scanner.nextInt();
+	            switch (ch) {
+	                case 1 -> AddNewClient();
+	                case 2 -> AddNewMeter();
+	                case 3 -> CalculateBill();
+	                case 4 -> OldRecord();
+	                case 5 -> ChangeClientInfo();
+	                case 6 -> PayBill();
+	                case 7 -> flag = false;
+	                default -> PrinterClass.println("INVALID CHOICE");
+	            }
+
+	        }
+	    }
+
+	    public static void main(String[] args) {
+	        Main main = new Main();
+	        main.Start();
+	    }
+
+	}

@@ -1,0 +1,102 @@
+package billing;
+import java.io.Serializable;
+
+public class Client implements Serializable {
+    private String FullName;
+    private String Email;
+    private String CNIC;
+    private String PhoneNumber;
+    int TotalMeters;
+    private ElectricityMeter[] electricityMeters =  new ElectricityMeter[2];
+    public static final int MAX_NUMBER_OF_METERS_ALLOWED = 2;
+
+    public Client() {
+    }
+
+    public Client(String fullName, String email, String CNIC, String phoneNumber, int totalMeters) {
+        FullName = fullName;
+        Email = email;
+        this.CNIC = CNIC;
+        PhoneNumber = phoneNumber;
+        TotalMeters = totalMeters;
+    }
+
+    public String getFullName() {
+        return FullName;
+    }
+
+    public ElectricityMeter[] getElectricityMeters() {
+        return electricityMeters;
+    }
+
+    public void InsertMeter(ElectricityMeter electricityMeters) {
+        if (TotalMeters < 2) {
+            this.electricityMeters[TotalMeters] = electricityMeters;
+            TotalMeters++;
+        }
+    }
+
+    public void setFullName(String fullName) {
+        FullName = fullName;
+    }
+
+    public String getEmail() {
+        return Email;
+    }
+
+    public void setEmail(String email) {
+        Email = email;
+    }
+
+    public String getCNIC() {
+        return CNIC;
+    }
+
+    public void setCNIC(String CNIC) {
+        this.CNIC = CNIC;
+    }
+
+    public String getPhoneNumber() {
+        return PhoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        PhoneNumber = phoneNumber;
+    }
+
+    public int getTotalMeters() {
+        return TotalMeters;
+    }
+
+    public void setTotalMeters(int totalMeters) {
+        TotalMeters = totalMeters;
+    }
+
+    public void Display() {
+        PrinterClass.println("Full Name :: " + FullName);
+        PrinterClass.println("Email :: " + Email);
+        PrinterClass.println("CNIC :: " + CNIC);
+        PrinterClass.println("Cell No :: " + PhoneNumber);
+        PrinterClass.println("Total Meters registered :: " + TotalMeters);
+        if (TotalMeters == 1) {
+            System.out.println("");
+            PrinterClass.println("Printing Data Of First Meter");
+            System.out.println("");
+            electricityMeters[0].Display();
+        } else if (TotalMeters == 2) {
+            System.out.println("");
+            PrinterClass.println("Printing Data Of First Meter");
+            System.out.println("");
+            electricityMeters[0].Display();
+            System.out.println("");
+            PrinterClass.println("Printing Data Of Second Meter");
+            System.out.println("");
+            electricityMeters[1].Display();
+
+        }
+    }
+}
+
+
+
+
